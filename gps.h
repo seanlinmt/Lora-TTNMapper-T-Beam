@@ -1,11 +1,13 @@
-#ifndef __GPS_H__
-#define __GPS_H__
+#pragma once
+
 
 #include <TinyGPS++.h>
 #include <HardwareSerial.h>
 
+
 #define GPS_TX 12
 #define GPS_RX 15
+
 
 class gps
 {
@@ -23,4 +25,4 @@ class gps
         TinyGPSPlus tGps;
 };
 
-#endif
+

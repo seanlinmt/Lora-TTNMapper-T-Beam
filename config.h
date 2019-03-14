@@ -1,5 +1,4 @@
-#ifndef LORA_TTNMAPPER_TBEAM_CONFIG_INCLUDED
-#define LORA_TTNMAPPER_TBEAM_CONFIG_INCLUDED
+#pragma once
 
 
 // UPDATE WITH YOUR TTN KEYS AND ADDR.
@@ -8,4 +7,3 @@ static u1_t PROGMEM APPSKEY[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x
 static const u4_t DEVADDR = 0x00000000 ; // LoRaWAN end-device address (DevAddr)
 
 
-#endif //LORA_TTNMAPPER_TBEAM_CONFIG_INCLUDED
