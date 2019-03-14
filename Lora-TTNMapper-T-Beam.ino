@@ -7,6 +7,7 @@
 #include "gps.h"
 
 // T-Beam specific hardware
+#undef BUILTIN_LED
 #define BUILTIN_LED 21
 
 char s[32]; // used to sprintf for Serial output
