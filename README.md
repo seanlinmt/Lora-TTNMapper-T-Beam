@@ -54,6 +54,7 @@ Let me know if more detailed instructions are needed.
 ## Todolist
 
 * ~~Stop sending data to TTN until the GPS get a fix.~~ <== Done thanks to [@Roeland54](https://github.com/Roeland54)
+* Switch to [the maintained version](https://github.com/mcci-catena/arduino-lmic) of the arduino-lmic library.
 * Manage and document the different T-Beam revisions/versions.
 * Switch to OTAA auth method for TTN and save the 'credentials' for reboot use.
 * Save and reload the frame counter somewhere - GPS RTC data ? SPIFFS ? EEPROM ? - so I can check the "Frame Counter Checks" box as recommended on TTN.
