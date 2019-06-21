@@ -25,7 +25,7 @@ void os_getDevKey (u1_t* buf) { }
 
 static osjob_t sendjob;
 // Schedule TX every this many seconds (might become longer due to duty cycle limitations).
-const unsigned TX_INTERVAL = 30;
+const unsigned TX_INTERVAL = 120;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
