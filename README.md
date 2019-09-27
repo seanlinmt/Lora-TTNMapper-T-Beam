@@ -14,7 +14,7 @@ Arduino IDE [ESP32 extension](https://github.com/espressif/arduino-esp32)
 
 ## Instructions
 
-You need to connect the [T-Beam](https://github.com/LilyGO/TTGO-T-Beam) DIO1 pin marked *Lora1* to the *pin 33* - So that the ESP32 can read that output from the Lora module.
+*On the oldest versions of the board* you need to connect the [T-Beam](https://github.com/LilyGO/TTGO-T-Beam) DIO1 pin marked *Lora1* to the *pin 33* - So that the ESP32 can read that output from the Lora module.
 Optionally you can also connect the *Lora2* output to *GPIO 32*, but this is not needed here.
 
 You can program the T-Beam using the [Arduino ESP32](https://github.com/espressif/arduino-esp32) board 'Heltec_WIFI_LoRa_32'.
