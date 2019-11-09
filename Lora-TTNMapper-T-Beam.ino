@@ -15,6 +15,8 @@
 char s[32]; // used to sprintf for Serial output
 uint8_t txBuffer[9];
 gps gps;
+// variable keep its values after restart or wakeup from sleep
+RTC_NOINIT_ATTR int RTCseqnoUp, RTCseqnoDn;
 
 // These callbacks are only used in over-the-air activation, so they are
 // left empty here (we cannot leave them out completely unless
@@ -34,6 +36,32 @@ const lmic_pinmap lmic_pins = {
   .rst = LMIC_UNUSED_PIN, // was "14,"
   .dio = {26, 33, 32},
 };
+
+void storeFrameCounters()
+{
+  RTCseqnoUp = LMIC.seqnoUp;
+  RTCseqnoDn = LMIC.seqnoDn;
+}
+
+void restoreFrameCounters()
+{
+  LMIC.seqnoUp = RTCseqnoUp;
+  LMIC.seqnoDn = RTCseqnoDn;
+  Serial.print(F("counter is "));
+  Serial.println(String(LMIC.seqnoUp));
+}
+
+void setOrRestoreFrameCounters()
+{
+  esp_reset_reason_t reason = esp_reset_reason();
+  if ((reason != ESP_RST_DEEPSLEEP) && (reason != ESP_RST_SW)) {
+    Serial.println(F("set counter to 0"));
+    LMIC.seqnoUp = 0;
+    LMIC.seqnoDn = 0;
+  } else {
+    restoreFrameCounters();
+  }
+}
 
 void onEvent (ev_t ev) {
   switch (ev) {
@@ -79,6 +107,7 @@ void onEvent (ev_t ev) {
         sprintf(s, "RSSI %d SNR %.1d", LMIC.rssi, LMIC.snr);
         Serial.println(s);
       }
+      storeFrameCounters();
       // Schedule next transmission
       esp_sleep_enable_timer_wakeup(TX_INTERVAL*1000000);
       esp_deep_sleep_start();
@@ -147,6 +176,7 @@ void setup() {
   LMIC_reset();
   
   LMIC_setSession (0x1, DEVADDR, NWKSKEY, APPSKEY);
+  setOrRestoreFrameCounters();
   
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
