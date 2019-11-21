@@ -57,9 +57,9 @@ Let me know if more detailed instructions are needed.
 * Switch to [the maintained version](https://github.com/mcci-catena/arduino-lmic) of the arduino-lmic library.
 * Manage and document the different T-Beam revisions/versions.
 * Switch to OTAA auth method for TTN and save the 'credentials' for reboot use.
-* Save and reload the frame counter somewhere - GPS RTC data ? SPIFFS ? EEPROM ? - so I can check the "Frame Counter Checks" box as recommended on TTN.
+* Save and reload the frame counter somewhere - GPS RTC data ? SPIFFS ? EEPROM ? - so I can check the "Frame Counter Checks" box as recommended on TTN. <== counter is stored in slow RTC memory so it's kept after deep sleep, thanks to [@christianwicke](https://github.com/christianwicke)
 * Also save the GPS 'status' so that on next boot it gets a fix faster.
-* Reduce the power needed ! That thing is a power hog currently, we need to make it sleep most of the time as possible.
+* ~~Reduce the power needed ! That thing is a power hog currently, we need to make it sleep most of the time as possible.~~
 * Adapt the data send frequency based on current velocity : When not moving, an update per hour should be enough.
 
 Let me know if you think anything else would make sense for a TTN mapper node : Open an issue, I will consider it.

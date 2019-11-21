@@ -15,7 +15,7 @@
 char s[32]; // used to sprintf for Serial output
 uint8_t txBuffer[9];
 gps gps;
-// variable keep its values after restart or wakeup from sleep
+// Those variables keep their values after software restart or wakeup from sleep, not after power loss or hard reset !
 RTC_NOINIT_ATTR int RTCseqnoUp, RTCseqnoDn;
 
 // These callbacks are only used in over-the-air activation, so they are
@@ -41,13 +41,14 @@ void storeFrameCounters()
 {
   RTCseqnoUp = LMIC.seqnoUp;
   RTCseqnoDn = LMIC.seqnoDn;
+  Serial.println(F("counter has been stored"));
 }
 
 void restoreFrameCounters()
 {
   LMIC.seqnoUp = RTCseqnoUp;
   LMIC.seqnoDn = RTCseqnoDn;
-  Serial.print(F("up counter is "));
+  Serial.print(F("restored counter is "));
   Serial.println(String(LMIC.seqnoUp));
 }
 
@@ -55,7 +56,7 @@ void setOrRestoreFrameCounters()
 {
   esp_reset_reason_t reason = esp_reset_reason();
   if ((reason != ESP_RST_DEEPSLEEP) && (reason != ESP_RST_SW)) {
-    Serial.println(F("set counters to 0"));
+    Serial.println(F("set counter to 0"));
     LMIC.seqnoUp = 0;
     LMIC.seqnoDn = 0;
   } else {
