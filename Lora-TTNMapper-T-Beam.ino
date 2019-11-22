@@ -15,17 +15,11 @@
 char s[32]; // used to sprintf for Serial output
 uint8_t txBuffer[9];
 gps gps;
+static osjob_t sendjob;
+
 // Those variables keep their values after software restart or wakeup from sleep, not after power loss or hard reset !
 RTC_NOINIT_ATTR int RTCseqnoUp, RTCseqnoDn;
 
-// These callbacks are only used in over-the-air activation, so they are
-// left empty here (we cannot leave them out completely unless
-// DISABLE_JOIN is set in config.h, otherwise the linker will complain).
-void os_getArtEui (u1_t* buf) { }
-void os_getDevEui (u1_t* buf) { }
-void os_getDevKey (u1_t* buf) { }
-
-static osjob_t sendjob;
 // Schedule TX every this many seconds (might become longer due to duty cycle limitations).
 const unsigned TX_INTERVAL = 120;
 
@@ -36,6 +30,17 @@ const lmic_pinmap lmic_pins = {
   .rst = LMIC_UNUSED_PIN, // was "14,"
   .dio = {26, 33, 32},
 };
+
+// These callbacks are only used in over-the-air activation.
+#ifdef USE_OTAA
+void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
+void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
+void os_getDevKey (u1_t* buf) { memcpy_P(buf, APPKEY, 16);}
+#else
+void os_getArtEui (u1_t* buf) { }
+void os_getDevEui (u1_t* buf) { }
+void os_getDevKey (u1_t* buf) { }
+#endif
 
 void storeFrameCounters()
 {
@@ -175,8 +180,11 @@ void setup() {
   os_init();
   // Reset the MAC state. Session and pending data transfers will be discarded.
   LMIC_reset();
-  
+
+#ifndef USE_OTAA
   LMIC_setSession (0x1, DEVADDR, NWKSKEY, APPSKEY);
+#endif
+
   setOrRestoreFrameCounters();
   
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
