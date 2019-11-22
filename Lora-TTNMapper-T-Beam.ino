@@ -19,11 +19,16 @@ static osjob_t sendjob;
 
 // Those variables keep their values after software restart or wakeup from sleep, not after power loss or hard reset !
 RTC_NOINIT_ATTR int RTCseqnoUp, RTCseqnoDn;
+#ifdef USE_OTAA
+RTC_NOINIT_ATTR u4_t otaaDevAddr;
+RTC_NOINIT_ATTR u1_t otaaNetwKey[16];
+RTC_NOINIT_ATTR u1_t otaaApRtKey[16];
+#endif
 
 // Schedule TX every this many seconds (might become longer due to duty cycle limitations).
 const unsigned TX_INTERVAL = 120;
 
-// Pin mapping
+// Pin mapping for TBeams, might not suit the latest version > 1.0 ?
 const lmic_pinmap lmic_pins = {
   .nss = 18,
   .rxtx = LMIC_UNUSED_PIN,
@@ -46,25 +51,29 @@ void storeFrameCounters()
 {
   RTCseqnoUp = LMIC.seqnoUp;
   RTCseqnoDn = LMIC.seqnoDn;
-  Serial.println(F("counter has been stored"));
+  sprintf(s, "Counters stored as %d/%d", LMIC.seqnoUp, LMIC.seqnoDn);
+  Serial.println(s);
 }
 
 void restoreFrameCounters()
 {
   LMIC.seqnoUp = RTCseqnoUp;
   LMIC.seqnoDn = RTCseqnoDn;
-  Serial.print(F("restored counter is "));
-  Serial.println(String(LMIC.seqnoUp));
+  sprintf(s, "Restored counters as %d/%d", LMIC.seqnoUp, LMIC.seqnoDn);
+  Serial.println(s);
 }
 
-void setOrRestoreFrameCounters()
+void setOrRestorePersistentCounters()
 {
   esp_reset_reason_t reason = esp_reset_reason();
-  if ((reason != ESP_RST_DEEPSLEEP) && (reason != ESP_RST_SW)) {
-    Serial.println(F("set counter to 0"));
+  if ((reason != ESP_RST_DEEPSLEEP) && (reason != ESP_RST_SW))
+  {
+    Serial.println(F("Counters both set to 0"));
     LMIC.seqnoUp = 0;
     LMIC.seqnoDn = 0;
-  } else {
+  }
+  else
+  {
     restoreFrameCounters();
   }
 }
@@ -88,9 +97,18 @@ void onEvent (ev_t ev) {
       break;
     case EV_JOINED:
       Serial.println(F("EV_JOINED"));
+#ifdef USE_OTAA    
+      otaaDevAddr = LMIC.devaddr;
+      memcpy_P(otaaNetwKey, LMIC.nwkKey, 16);
+      memcpy_P(otaaApRtKey, LMIC.artKey, 16);
+      sprintf(s, "got devaddr = 0x%X", LMIC.devaddr);
+      Serial.println(s);
+#endif
       // Disable link check validation (automatically enabled
       // during join, but not supported by TTN at this time).
       LMIC_setLinkCheckMode(0);
+      // TTN uses SF9 for its RX2 window.
+      LMIC.dn2Dr = DR_SF9;
       break;
     case EV_RFU1:
       Serial.println(F("EV_RFU1"));
@@ -181,11 +199,25 @@ void setup() {
   // Reset the MAC state. Session and pending data transfers will be discarded.
   LMIC_reset();
 
-#ifndef USE_OTAA
+  
+#ifdef USE_OTAA
+  esp_reset_reason_t reason = esp_reset_reason();
+  if ((reason == ESP_RST_DEEPSLEEP) || (reason == ESP_RST_SW))
+  {
+    LMIC_setSession(0x1, otaaDevAddr, otaaNetwKey, otaaApRtKey);
+  }
+#else // ABP
   LMIC_setSession (0x1, DEVADDR, NWKSKEY, APPSKEY);
+
+  // TTN uses SF9 for its RX2 window.
+  LMIC.dn2Dr = DR_SF9;
+
+  // Disable link check validation
+  LMIC_setLinkCheckMode(0);
 #endif
 
-  setOrRestoreFrameCounters();
+  // This must be done AFTER calling LMIC_setSession !
+  setOrRestorePersistentCounters();
   
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
@@ -196,12 +228,6 @@ void setup() {
   LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK,  DR_FSK),  BAND_MILLI);      // g2-band
-
-  // Disable link check validation
-  LMIC_setLinkCheckMode(0);
-
-  // TTN uses SF9 for its RX2 window.
-  LMIC.dn2Dr = DR_SF9;
 
   // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
   LMIC_setDrTxpow(DR_SF7,14); 
