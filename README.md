@@ -56,8 +56,8 @@ Let me know if more detailed instructions are needed.
 * ~~Stop sending data to TTN until the GPS get a fix.~~ <== Done thanks to [@Roeland54](https://github.com/Roeland54)
 * Switch to [the maintained version](https://github.com/mcci-catena/arduino-lmic) of the arduino-lmic library.
 * Manage and document the different T-Beam revisions/versions.
-* Switch to OTAA auth method for TTN and save the 'credentials' for reboot use.
-* Save and reload the frame counter somewhere - GPS RTC data ? SPIFFS ? EEPROM ? - so I can check the "Frame Counter Checks" box as recommended on TTN. <== counter is stored in slow RTC memory so it's kept after deep sleep, thanks to [@christianwicke](https://github.com/christianwicke)
+* ~~Switch to OTAA auth method for TTN and save the 'credentials' for use after deep sleep.~~ <== Done thanks to [@fede2cr](https://github.com/fede2cr)
+* Save and reload the frame counter somewhere - GPS RTC data ? SPIFFS ? EEPROM ? - so I can check the "Frame Counter Checks" box as recommended on TTN. <== counter is stored in slow RTC memory so it's kept after deep sleep, thanks to [@christianwicke](https://github.com/christianwicke) - Still investigating the GPS module Battery Backed RAM for saving after power off.
 * Also save the GPS 'status' so that on next boot it gets a fix faster.
 * ~~Reduce the power needed ! That thing is a power hog currently, we need to make it sleep most of the time as possible.~~
 * Adapt the data send frequency based on current velocity : When not moving, an update per hour should be enough.
