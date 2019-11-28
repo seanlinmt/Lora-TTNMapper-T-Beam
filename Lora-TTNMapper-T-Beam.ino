@@ -1,12 +1,15 @@
+// If you are in USA on a 915Mhz network instead of an european / 868 Mhz one,
+//   you MUST modify the arduino lmic library "config.h" to enable CFG_us915 instead of CFG_eu868.
+// That "config.h" should be in the same folder as the "lmic.h" file in your arduino folders.
 #include <lmic.h>
 #include <hal/hal.h>
-#include <WiFi.h>
 
-#include "esp_sleep.h"
-
-// UPDATE the config.h file in the same folder WITH YOUR TTN KEYS AND ADDR.
-#include "config.h"
+// UPDATE our "device_config.h" file in the same folder WITH YOUR TTN KEYS AND ADDR.
+#include "device_config.h"
 #include "gps.h"
+
+#include <WiFi.h>
+#include <esp_sleep.h>
 
 // T-Beam specific hardware
 #undef BUILTIN_LED
@@ -133,6 +136,7 @@ void onEvent (ev_t ev) {
       }
       storeFrameCounters();
       // Schedule next transmission
+      Serial.println("Good night...");
       esp_sleep_enable_timer_wakeup(TX_INTERVAL*1000000);
       esp_deep_sleep_start();
       do_send(&sendjob);
@@ -218,7 +222,8 @@ void setup() {
 
   // This must be done AFTER calling LMIC_setSession !
   setOrRestorePersistentCounters();
-  
+
+#ifdef CFG_eu868  
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
   LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
@@ -228,6 +233,17 @@ void setup() {
   LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK,  DR_FSK),  BAND_MILLI);      // g2-band
+#endif
+
+#ifdef CFG_us915
+  LMIC_selectSubBand(1);
+
+  //Disable FSB2-8, channels 16-72
+  for (int i = 16; i < 73; i++) {
+    if (i != 10)
+      LMIC_disableChannel(i);
+  }
+#endif
 
   // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
   LMIC_setDrTxpow(DR_SF7,14); 

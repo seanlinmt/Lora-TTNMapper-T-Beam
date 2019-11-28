@@ -11,10 +11,11 @@ Arduino IDE [ESP32 extension](https://github.com/espressif/arduino-esp32)
 [TinyGPS++](http://arduiniana.org/libraries/tinygpsplus/)
 
 [LMIC-Arduino](https://github.com/matthijskooijman/arduino-lmic) : Make sure to get the last version - *1.5.0+arduino-2* currently - because the arduino IDE library updater is getting confused by the versioning scheme of that library.
+If you are on a 915 Mhz - ie USA - network you must modify the lmic library "config.h" file accordingly !
 
 ## Instructions
 
-*On the oldest versions of the board* you need to connect the [T-Beam](https://github.com/LilyGO/TTGO-T-Beam) DIO1 pin marked *Lora1* to the *pin 33* - So that the ESP32 can read that output from the Lora module.
+*Only on the oldest versions of the board* you need to connect the [T-Beam](https://github.com/LilyGO/TTGO-T-Beam) DIO1 pin marked *Lora1* to the *pin 33* - So that the ESP32 can read that output from the Lora module.
 Optionally you can also connect the *Lora2* output to *GPIO 32*, but this is not needed here.
 
 You can program the T-Beam using the [Arduino ESP32](https://github.com/espressif/arduino-esp32) board 'T-Beam'.
