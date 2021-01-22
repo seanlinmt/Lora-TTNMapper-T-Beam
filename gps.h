@@ -6,7 +6,7 @@
 
 
 #define GPS_TX 12
-#define GPS_RX 15
+#define GPS_RX 34
 
 
 class gps
@@ -24,5 +24,3 @@ class gps
         char t[32]; // used to sprintf for Serial output
         TinyGPSPlus tGps;
 };
-
-

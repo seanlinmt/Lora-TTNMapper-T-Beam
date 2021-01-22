@@ -2,7 +2,7 @@
 
 
 // uncomment to use OTAA instead of ABP
-//#define USE_OTAA 1
+#define USE_OTAA 1
 
 
 // UPDATE WITH YOUR DEVICE TTN SECRETS

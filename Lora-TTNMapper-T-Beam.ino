@@ -7,7 +7,7 @@
 // UPDATE our "device_config.h" file in the same folder WITH YOUR TTN KEYS AND ADDR.
 #include "device_config.h"
 #include "gps.h"
-
+#include <axp20x.h>
 #include <WiFi.h>
 #include <esp_sleep.h>
 
@@ -19,6 +19,7 @@ char s[32]; // used to sprintf for Serial output
 uint8_t txBuffer[9];
 gps gps;
 static osjob_t sendjob;
+AXP20X_Class axp;
 
 // Those variables keep their values after software restart or wakeup from sleep, not after power loss or hard reset !
 RTC_NOINIT_ATTR int RTCseqnoUp, RTCseqnoDn;
@@ -35,7 +36,7 @@ const unsigned TX_INTERVAL = 120;
 const lmic_pinmap lmic_pins = {
   .nss = 18,
   .rxtx = LMIC_UNUSED_PIN,
-  .rst = LMIC_UNUSED_PIN, // was "14,"
+  .rst = 23, // was "14,"
   .dio = {26, 33, 32},
 };
 
@@ -196,6 +197,20 @@ void setup() {
   //Turn off WiFi and Bluetooth
   WiFi.mode(WIFI_OFF);
   btStop();
+
+  // power on GPS
+  Wire.begin(21, 22);
+  if (!axp.begin(Wire, AXP192_SLAVE_ADDRESS)) {
+    Serial.println("AXP192 Begin PASS");
+  } else {
+    Serial.println("AXP192 Begin FAIL");
+  }
+  axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);
+  axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);
+  axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
+  axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
+  axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
+  
   gps.init();
 
   // LMIC init
